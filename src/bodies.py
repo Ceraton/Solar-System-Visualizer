@@ -1,23 +1,24 @@
 import json
-from typing import List
 
+# Abstract Celestial Entity
 class CelestialBody:
-    def __init__(self, name, radius_km, color, glow_color, mass_kg, description, type):
-        self.name = name
-        self.radius_km = radius_km
-        self.color = color
-        self.glow_color = glow_color
-        self.mass_kg = mass_kg
-        self.description = description
-        self.type = type
+    def __init__(self, data: dict):
+        self.name = data["name"]
+        self.radius_km = data["radius_km"]
+        self.color = data["color"]
+        self.glow_color = data["glow_color"]
+        self.mass_kg = data["mass_kg"]
+        self.description = data["description"]
+        self.type = data["type"]
 
     def __repr__(self):
-        return "{self.type}: {self.name} (radius= {self.radius_km} km)"
-    
+        return f"{self.type}: {self.name} (radius= {self.radius_km} km)"
+
+# Planet and its Moons
 class Planet(CelestialBody):
-    def __init__(self, name, radius_km, color, glow_color, mass_kg, description, type, distance_au):
-        super().__init__(name, radius_km, color, glow_color, mass_kg, description, type)
-        self.distance_au = distance_au
+    def __init__(self, data: dict):
+        super().__init__(data)
+        self.distance_au = data["distance_au"]
         self.moons = []
 
     def add_moon(self, moon):
@@ -27,18 +28,24 @@ class Planet(CelestialBody):
         return len(self.moons)
 
 class Moon(CelestialBody):
-    def __init__(self, name, radius_km, color, glow_color, mass_kg, description, type, parent, orbital_radius_km):
-        super().__init__(name, radius_km, color, glow_color, mass_kg, description, type)
-        self.parent_name = parent
-        self.orbital_radius_km = orbital_radius_km
+    def __init__(self, data: dict):
+        super().__init__(data)
+        self.parent_name = data["parent"]
+        self.orbital_radius_km = data["orbital_radius_km"]
         self.parent = None
 
+#-- Pluto is a small body with its own moon --
 class SmallBody(CelestialBody):
-    def __init__(self, name, radius_km, color, glow_color, mass_kg, description, type, distance_au):
-        super().__init__(name, radius_km, color, glow_color, mass_kg, description, type)
-        self.distance_au = distance_au
+    def __init__(self, data: dict):
+        super().__init__(data)
+        self.distance_au = data["distance_au"]
         self.parent = None
+        self.moons = []
 
+    def add_moon(self, moon):
+        self.moons.append(moon)
+
+# Wrap everything together into a singular system
 class SolarSystem:
     def __init__(self, planets_path, moons_path):
         self.planets = []
@@ -70,13 +77,14 @@ class SolarSystem:
                 self.small_bodies.append(small_body)
 
     def _link_moons(self):
-        for planet in self.planets:
-            for moon in self.moons:
-                if self.small_bodies["parent"] == planet["name"]:
-                    planet.add_moon(moon)
+        lookup = {body.name: body for body in self.planets + self.small_bodies}
+        for moon in self.moons:
+            if moon.parent_name in lookup:
+                moon.parent = lookup[moon.parent_name]
+                moon.parent.add_moon(moon)
 
-    def get_all_bodies(self) -> List[CelestialBody]:
-        return [self.planets] + [self.small_bodies] + [self.moons]
+    def get_all_bodies(self):
+        return self.planets + self.small_bodies + self.moons
     
     def get_by_type(self, type_string):
         bodies = self.get_all_bodies()
@@ -87,17 +95,15 @@ class SolarSystem:
         return body_filter
     
     def get_by_name(self, name_string):
-        bodies = self.get_all_bodies()
-        body_filter = []
-        for body in bodies:
+        for body in self.get_all_bodies():
             if name_string == body.name:
-                body_filter.append(body)
-        return body_filter
+                return body
+        return None
     
     def iterate_planets(self):
         for planet in self.planets:
             yield planet
-            for moon in self.moons:
+            for moon in planet.moons:
                 yield moon
 
     def iterate_small_bodies(self):

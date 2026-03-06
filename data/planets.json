@@ -1,6 +1,7 @@
 [
   {
     "name": "Sun",
+    "type": "star",
     "radius_km": 695700,
     "distance_au": 0,
     "color": [255, 220, 50],
@@ -11,6 +12,7 @@
   },
   {
     "name": "Mercury",
+    "type": "planet",
     "radius_km": 2439.7,
     "distance_au": 0.39,
     "color": [169, 169, 169],
@@ -21,6 +23,7 @@
   },
   {
     "name": "Venus",
+    "type": "planet",
     "radius_km": 6051.8,
     "distance_au": 0.72,
     "color": [227, 185, 100],
@@ -31,6 +34,7 @@
   },
   {
     "name": "Earth",
+    "type": "planet",
     "radius_km": 6371,
     "distance_au": 1.0,
     "color": [70, 130, 180],
@@ -41,6 +45,7 @@
   },
   {
     "name": "Mars",
+    "type": "planet",
     "radius_km": 3389.5,
     "distance_au": 1.52,
     "color": [188, 100, 60],
@@ -51,6 +56,7 @@
   },
   {
     "name": "Jupiter",
+    "type": "planet",
     "radius_km": 69911,
     "distance_au": 5.2,
     "color": [210, 180, 130],
@@ -61,6 +67,7 @@
   },
   {
     "name": "Saturn",
+    "type": "planet",
     "radius_km": 58232,
     "distance_au": 9.58,
     "color": [210, 195, 140],
@@ -71,6 +78,7 @@
   },
   {
     "name": "Uranus",
+    "type": "planet",
     "radius_km": 25362,
     "distance_au": 19.2,
     "color": [135, 205, 215],
@@ -81,6 +89,7 @@
   },
   {
     "name": "Neptune",
+    "type": "planet",
     "radius_km": 24622,
     "distance_au": 30.05,
     "color": [60, 90, 200],
