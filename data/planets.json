@@ -1,0 +1,92 @@
+[
+  {
+    "name": "Sun",
+    "radius_km": 695700,
+    "distance_au": 0,
+    "color": [255, 220, 50],
+    "glow_color": [255, 160, 0],
+    "mass_kg": 1.989e30,
+    "moons": 0,
+    "description": "Our star. 109x wider than Earth."
+  },
+  {
+    "name": "Mercury",
+    "radius_km": 2439.7,
+    "distance_au": 0.39,
+    "color": [169, 169, 169],
+    "glow_color": [130, 130, 130],
+    "mass_kg": 3.285e23,
+    "moons": 0,
+    "description": "Smallest planet. No atmosphere."
+  },
+  {
+    "name": "Venus",
+    "radius_km": 6051.8,
+    "distance_au": 0.72,
+    "color": [227, 185, 100],
+    "glow_color": [200, 150, 60],
+    "mass_kg": 4.867e24,
+    "moons": 0,
+    "description": "Hottest planet. Thick toxic atmosphere."
+  },
+  {
+    "name": "Earth",
+    "radius_km": 6371,
+    "distance_au": 1.0,
+    "color": [70, 130, 180],
+    "glow_color": [30, 80, 140],
+    "mass_kg": 5.972e24,
+    "moons": 1,
+    "description": "Our home. Only known life in the universe."
+  },
+  {
+    "name": "Mars",
+    "radius_km": 3389.5,
+    "distance_au": 1.52,
+    "color": [188, 100, 60],
+    "glow_color": [150, 60, 30],
+    "mass_kg": 6.39e23,
+    "moons": 2,
+    "description": "The Red Planet. Has the tallest volcano."
+  },
+  {
+    "name": "Jupiter",
+    "radius_km": 69911,
+    "distance_au": 5.2,
+    "color": [210, 180, 130],
+    "glow_color": [170, 130, 90],
+    "mass_kg": 1.898e27,
+    "moons": 95,
+    "description": "Largest planet. Giant storm for 350+ years."
+  },
+  {
+    "name": "Saturn",
+    "radius_km": 58232,
+    "distance_au": 9.58,
+    "color": [210, 195, 140],
+    "glow_color": [175, 155, 100],
+    "mass_kg": 5.683e26,
+    "moons": 146,
+    "description": "Has stunning ring system. Least dense planet."
+  },
+  {
+    "name": "Uranus",
+    "radius_km": 25362,
+    "distance_au": 19.2,
+    "color": [135, 205, 215],
+    "glow_color": [80, 170, 185],
+    "mass_kg": 8.681e25,
+    "moons": 27,
+    "description": "Rotates on its side. Ice giant."
+  },
+  {
+    "name": "Neptune",
+    "radius_km": 24622,
+    "distance_au": 30.05,
+    "color": [60, 90, 200],
+    "glow_color": [30, 50, 160],
+    "mass_kg": 1.024e26,
+    "moons": 16,
+    "description": "Fastest winds in the solar system."
+  }
+]
