@@ -1,10 +1,12 @@
 import pygame
+from visuals.renderer import draw_planet
 
 BASE_EARTH_PX = 30
+EARTH_RADIUS_KM = 6371.0
 
 def clamp(n, min_value, max_value): return max(min_value, min(n, max_value))
 
-def SizeCompareMode():
+class SizeCompareMode:
     def __init__(self, solar_system, screen_w, screen_h):
         self.solar_system = solar_system
         self.screen_w = screen_w
@@ -13,10 +15,10 @@ def SizeCompareMode():
         self.offset_x = 0.0
         self.offset_y = 0.0
         self.base_positions = []
-
+        
         self._compute_layout()
 
-    def compute_layout(self):
+    def _compute_layout(self):
         x = 80
         cy = self.screen_h / 2
 
@@ -34,7 +36,7 @@ def SizeCompareMode():
             x = x + display_r + 20 #padding after planet
 
     def _radius_px(self, planet, zoom):
-        ratio = planet.radius_km / self.solar_system.planets["earth"].radius_km
+        ratio = planet.radius_km / EARTH_RADIUS_KM
         return max(2, int(ratio * BASE_EARTH_PX * zoom))
 
     def world_to_screen(self, wx, wy):
@@ -62,7 +64,7 @@ def SizeCompareMode():
 
     def get_hovered(self, mouse_pos):
         for i, (bx, by, br) in enumerate(self.base_positions):
-            (sx, sy) = world_to_screen(bx, by)
+            (sx, sy) = self.world_to_screen(bx, by)
             r = br * self.zoom
 
             if (max(mouse_pos[0], sx) - min(mouse_pos[0], sx) <= r or \
@@ -71,12 +73,12 @@ def SizeCompareMode():
         return None
 
     def draw(self, surface, fonts, selected_idx, show_labels):
-        for i, (planet, base_pos) in enumerate(zip(self.solar_system.planets, self.base_positions)):
-            (sx, sy) = world_to_screen(base_pos.x, base_pos.y)
-            r = max(2, int(base_pos.radius * self.zoom))
+        for i, (planet, (bx, by, br)) in enumerate(zip(self.solar_system.planets, self.base_positions)):
+            (sx, sy) = self.world_to_screen(bx, by)
+            r = max(2, int(br * self.zoom))
             is_selected = (i == selected_idx)
 
-            if planet.name == "Sun" and zoom < 3:
+            if planet.name == "Sun" and self.zoom < 3:
                 true_radius_px = self._radius_px(planet, self.zoom)
                 note = f"(True scale: {true_radius_px}px)"
                 note_surf = fonts[3].render(note, True, (150, 120, 50))
@@ -84,9 +86,9 @@ def SizeCompareMode():
                 note_y = sy - r - 30
                 surface.blit(note_surf, (note_x, note_y))
             
-            self.draw(surface, planet, (sx, sy), r, \
-                      is_selected, fonts.label if show_labels else None, \
-                        show_labels)
+            draw_planet(surface, planet, (int(sx), int(sy)), r, \
+                    selected=is_selected, font=fonts[0] if show_labels else None,
+                    show_label=show_labels)
 
         earth_diameter_px = int(BASE_EARTH_PX * self.zoom * 2)
         bar_x = 20
@@ -94,9 +96,10 @@ def SizeCompareMode():
 
         # Horizontal line
         pygame.draw.line(surface, (120, 140, 180), \
-                         (bar_x, bar_y), \
-                            (bar_x + earth_diameter_px, bar_y), \
-                                2)
+                        (bar_x, bar_y),
+                        (bar_x + earth_diameter_px, bar_y),
+                        2)
+        
         # Left tick
         pygame.draw.line(surface, (120, 140, 180),
                         (bar_x, bar_y - 5),

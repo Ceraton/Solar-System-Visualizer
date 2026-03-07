@@ -5,21 +5,28 @@ def draw_starfield(surface,stars):
     for (x, y, r, brightness) in stars:
         pygame.draw.circle(surface, (brightness, brightness, brightness), (x, y), r)
 
+_glow_cache = {}
 def draw_glow(surface, color, pos, radius, intensity=80):
-    glow_surf = pygame.Surface((radius * 6, radius * 6), pygame.SRCALPHA)
+    glow_radius = min(radius, 150)
+    key = (glow_radius, color[0], color[1], color[2], intensity)
 
-    for i in range(6, 0, -1):
-        alpha = int(intensity * (i / 6) ** 2)
-        glow_radius = int(radius * (1 + i * 0.35))
-        glow_color = (color[0], color[1], color[2], alpha)
-        pygame.draw.circle(
-            glow_surf,
-            glow_color,
-            (radius * 3, radius * 3),   # center of glow surface
-            glow_radius
-        )
+    if key not in _glow_cache:
+        glow_surf = pygame.Surface((radius * 6, radius * 6), pygame.SRCALPHA)
+        glow_surf = glow_surf.convert_alpha()
 
-    surface.blit(glow_surf, (pos[0] - radius * 3, pos[1] - radius * 3))
+        for i in range(3, 0, -1):
+            alpha = int(intensity * (i / 3) ** 2)
+            r = int(radius * (1 + i * 0.35))
+            pygame.draw.circle(
+                glow_surf,
+                (color[0], color[1], color[2], alpha),
+                (glow_radius * 3, glow_radius * 3),   # center of glow surface
+                r
+            )
+        _glow_cache[key] = glow_surf
+
+    cached = _glow_cache[key]
+    surface.blit(cached, (pos[0] - radius * 3, pos[1] - radius * 3))
 
 def draw_planet(surface, planet, pos, radius, selected=False, font=None, show_label=True):
     # Glow
@@ -94,3 +101,13 @@ def draw_info_panel(surface, planet, font_large, font_small, screen_w, screen_h)
     for i, line in enumerate(lines):
         text_surf = font_small.render(line, True, (180, 200, 230))
         surface.blit(text_surf, (panel_x + 16, panel_y + 48 + i * 18))
+
+def draw_controls_hint(surface, font, screen_w):
+    hints = [
+        "Scroll: zoom  |  Drag: pan  |  Click planet: info",
+        "1: Size Compare  2: Orrery  R: Reset  L: Labels  Q: Quit"
+    ]
+    for i, hint in enumerate(hints):
+        text_surf = font.render(hint, True, (100, 120, 160))
+        x = screen_w // 2 - text_surf.get_width() // 2
+        surface.blit(text_surf, (x, 10 + i * 18))
