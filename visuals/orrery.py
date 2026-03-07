@@ -1,4 +1,5 @@
 import pygame, math
+from visuals.renderer import draw_planet, is_on_screen
 
 def clamp(n, min_value, max_value): return max(min_value, min(n, max_value))
 
@@ -90,4 +91,21 @@ class OrreryMode:
                     int(orbit_r),
                     1
                 )
-                surface.blit(orbit_surf, (0, 0))
+        surface.blit(orbit_surf, (0, 0))
+
+        for i, planet in enumerate(self.solar_system.planets):
+            pos = self.planet_screen_pos(planet)
+            r   = max(2, int(self._planet_radius_px(planet)))
+
+            if not is_on_screen(pos, r, self.screen_w, self.screen_h):
+                continue
+
+            draw_planet(
+                surface,
+                planet,
+                pos,
+                r,
+                selected=(i == selected_idx),
+                font=fonts[0] if show_labels else None,
+                show_label=show_labels
+            )

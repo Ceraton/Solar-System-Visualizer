@@ -1,5 +1,5 @@
 import pygame
-from visuals.renderer import draw_planet
+from visuals.renderer import draw_planet, is_on_screen
 
 BASE_EARTH_PX = 30
 EARTH_RADIUS_KM = 6371.0
@@ -86,6 +86,9 @@ class SizeCompareMode:
                 note_y = sy - r - 30
                 surface.blit(note_surf, (note_x, note_y))
             
+            if not is_on_screen((int(sx), int(sy)), r, self.screen_w, self.screen_h):
+                continue
+
             draw_planet(surface, planet, (int(sx), int(sy)), r, \
                     selected=is_selected, font=fonts[0] if show_labels else None,
                     show_label=show_labels)

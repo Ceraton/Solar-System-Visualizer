@@ -111,3 +111,12 @@ def draw_controls_hint(surface, font, screen_w):
         text_surf = font.render(hint, True, (100, 120, 160))
         x = screen_w // 2 - text_surf.get_width() // 2
         surface.blit(text_surf, (x, 10 + i * 18))
+
+def is_on_screen(pos, radius, screen_w, screen_h):
+    x, y = pos
+    return (
+        x + radius > 0 and
+        x - radius < screen_w and
+        y + radius > 0 and
+        y - radius < screen_h
+    )
