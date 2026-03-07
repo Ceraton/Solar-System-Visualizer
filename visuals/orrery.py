@@ -1,5 +1,7 @@
 import pygame, math
 from visuals.renderer import draw_planet, is_on_screen
+from visuals.timeline import Timeline
+
 
 def clamp(n, min_value, max_value): return max(min_value, min(n, max_value))
 
@@ -10,7 +12,7 @@ MIN_PLANET_R        = 3     #minimum planet radius in pixels
 MAX_PLANET_R        = 22    #maximum planet radius in pixels
 
 class OrreryMode:
-    def __init__(self, solar_system, screen_w, screen_h):
+    def __init__(self, solar_system, screen_w, screen_h, timeline):
         self.solar_system = solar_system
         self.screen_w = screen_w
         self.screen_h = screen_h
@@ -18,6 +20,7 @@ class OrreryMode:
         self.offset_x = screen_w / 2
         self.offset_y = screen_h / 2
         self.time = 0.0
+        self.timeline = timeline
 
     def _orbit_radius_px(self, au, zoom):
         if au == 0:
@@ -28,30 +31,30 @@ class OrreryMode:
     def _planet_radius_px(self, planet):
         ratio = math.log10(planet.radius_km / 2000 + 1) + 0.3
         r = ratio * 14 * self.zoom
-        return max(self.MIN_PLANET_R, min(self.MAX_PLANET_R * self.zoom, r))
+        return max(MIN_PLANET_R, min(MAX_PLANET_R * self.zoom, r))
     
-    def planet_screen_pos(self, planet, time):
+    def planet_screen_pos(self, planet, time=None):
+        if time is None:
+            time = self.time
+
         if planet.distance_au == 0:
-            return (self.offset_x, self.offset_y)
+            return (int(self.offset_x), int(self.offset_y))
         
+        angle_deg = self.timeline.get_angle(planet)
+        angle_rad = angle_deg * (math.pi / 180)
         orbit_r = self._orbit_radius_px(planet.distance_au, self.zoom)
-
-        # Kepler's third law
-        period = planet.distance_au ** 1.5
-        angle = (time / period) * 2 * float(22/7)
-
-        x = self.offset_x + orbit_r * math.cos(angle)
-        y = self.offset_y + orbit_r * math.sin(angle)
+        x = self.offset_x + orbit_r * math.cos(angle_rad)
+        y = self.offset_y + orbit_r * math.sin(angle_rad)
         return (int(x), int(y))
 
     def handle_event(self, event):
         if event.type == pygame.MOUSEWHEEL:
             factor = 1.1 if event.y == 1 else 0.9
         
-        mx, my = pygame.mouse.get_pos()
-        self.offset_x = mx - (mx - self.offset_x) * factor
-        self.offset_y = my - (my - self.offset_y) * factor
-        self.zoom = clamp(self.zoom * factor, 0.1, 10.0)
+            mx, my = pygame.mouse.get_pos()
+            self.offset_x = mx - (mx - self.offset_x) * factor
+            self.offset_y = my - (my - self.offset_y) * factor
+            self.zoom = clamp(self.zoom * factor, 0.1, 10.0)
 
     def update_pan(self, dx, dy):
         self.offset_x += dx
@@ -63,15 +66,16 @@ class OrreryMode:
         self.offset_y = self.screen_h / 2
 
     def tick(self, dt):
-        self.time += dt * 0.01
+        self.time += dt * 0.0005
 
     def get_hovered(self, mouse_pos):
+        mx, my = mouse_pos
         for i, planet in enumerate(self.solar_system.planets):
-            posx, posy = self.planet_screen_pos(planet)
+            px, py = self.planet_screen_pos(planet)
             r   = self._planet_radius_px(planet)
 
-            if (max(mouse_pos[0], posx) - min(mouse_pos[0], posx) <= (r + 4) or \
-                max(mouse_pos[1], posy) - min((mouse_pos[1], posy)) <= (r + 4)):
+            distance = math.sqrt((mx - px) ** 2 + (my - py) ** 2)
+            if distance <= r + 4:
                 return i
         return None
     

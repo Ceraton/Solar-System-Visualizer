@@ -8,6 +8,10 @@ from visuals.renderer import (
 )
 from visuals.size_compare import SizeCompareMode
 from visuals.orrery import OrreryMode
+from visuals.timeline import Timeline
+from datetime import date
+import os
+
 
 WIDTH, HEIGHT   = 1280, 800
 FPS             = 60
@@ -15,7 +19,7 @@ BG_COLOR        = (4, 6, 18)
 PLANETS_PATH = Path('data/planets.json')
 MOONS_PATH = Path('data/moons.json')
 
-
+os.environ['SDL_VIDEO_WINDOW_POS'] = '100,100'
 
 def generate_stars(n=350, w=WIDTH, h=HEIGHT):
     stars = []
@@ -26,11 +30,6 @@ def generate_stars(n=350, w=WIDTH, h=HEIGHT):
         brightness = random.randint(100, 255)
         stars.append((x, y, r, brightness))
     return stars
-
-pygame.init()
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Solar System Visualizer")
-clock = pygame.time.Clock()
 
 def main():
     pygame.init()
@@ -48,10 +47,11 @@ def main():
     # Data
     solar_system = SolarSystem(PLANETS_PATH, MOONS_PATH)
     stars        = generate_stars(n=200)
+    timeline = Timeline()
 
     # Modes
     size_mode   = SizeCompareMode(solar_system, WIDTH, HEIGHT)
-    orrery_mode = OrreryMode(solar_system, WIDTH, HEIGHT)
+    orrery_mode = OrreryMode(solar_system, WIDTH, HEIGHT, timeline)
     active_mode = size_mode             # start in size compare
 
     # State
@@ -72,29 +72,40 @@ def main():
 
             
 
+
+            
+
             # set needs_redraw = True on any input event
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
 
                 # Keyboard
-                if event.type == pygame.KEYDOWN:
+                if event.type == pygame.KEYDOWN:        # ← must check type first
                     if event.key == pygame.K_q or event.key == pygame.K_ESCAPE:
                         running = False
-                    else:
+                    if event.key == pygame.K_1:
+                        active_mode = size_mode
                         needs_redraw = True
-                        if event.key == pygame.K_1:
-                            active_mode = size_mode
-
-                        if event.key == pygame.K_2:
-                            active_mode = orrery_mode
-
-                        if event.key == pygame.K_r:
-                            active_mode.reset()
-                            selected_idx = None
-
-                        if event.key == pygame.K_l:
-                            show_labels = not show_labels
+                    if event.key == pygame.K_2:
+                        active_mode = orrery_mode
+                        needs_redraw = True
+                    if event.key == pygame.K_r:
+                        active_mode.reset()
+                        selected_idx = None
+                        needs_redraw = True
+                    if event.key == pygame.K_l:
+                        show_labels = not show_labels
+                        needs_redraw = True
+                    if event.key == pygame.K_SPACE:
+                        if timeline.playing:
+                            timeline.pause()
+                        else:
+                            timeline.play()
+                        needs_redraw = True
+                    if event.key == pygame.K_EQUALS:
+                        timeline.speed *= 2
+                        needs_redraw = True
 
                 # Zoom
                 if event.type == pygame.MOUSEWHEEL:
@@ -103,6 +114,7 @@ def main():
 
                 # Click
                 if event.type == pygame.MOUSEBUTTONDOWN:
+
                     if event.button == 1:
                         dragging   = True
                         drag_start = pygame.mouse.get_pos()
@@ -127,35 +139,50 @@ def main():
                         drag_start = (mx, my)
                         needs_redraw = True
                 
-                # Tick animation (orrery only)
-                if active_mode is orrery_mode:
-                    orrery_mode.tick(dt)
-                    needs_redraw = True
+            
+                if event.type == pygame.K_SPACE:
+                    if timeline.playing:
+                        timeline.pause()
+                    else:
+                        timeline.play()
 
-                if needs_redraw:
-                    # Clear screen
-                    screen.fill(BG_COLOR)
-                    # Draw starfield
-                    draw_starfield(screen, stars)
-                    # Draw active mode
-                    active_mode.draw(screen, fonts, selected_idx, show_labels)
-                    # Draw info panel if something selected
-                    if selected_idx is not None:
-                        planet = solar_system.planets[selected_idx]
-                        draw_info_panel(screen, planet, font_large, font_small, WIDTH, HEIGHT)
-                    # Draw controls hint
-                    draw_controls_hint(screen, font_hint, WIDTH)
-                    fps_surf = font_hint.render(\
-                        f"FPS: {int(clock.get_fps())}", 
-                        True, (255, 255, 255))
-                    screen.blit(fps_surf, (10, 10))
-                    # Flip
-                    pygame.display.flip()
-                    needs_redraw = False
+                if event.type == pygame.K_PLUS: # + key
+                    timeline.speed *= 2
+                if event.type == pygame.K_MINUS:
+                    timeline.speed /= 2
+
+            # Tick animation (orrery only)
+            if active_mode is orrery_mode:
+                orrery_mode.tick(dt)
+                needs_redraw = True
+
+            if needs_redraw:
+                print("drawing")
+                # Clear screen
+                screen.fill(BG_COLOR)
+                # Draw starfield
+                draw_starfield(screen, stars)
+                # Draw active mode
+                active_mode.draw(screen, fonts, selected_idx, show_labels)
+                # Draw info panel if something selected
+                if selected_idx is not None:
+                    planet = solar_system.planets[selected_idx]
+                    draw_info_panel(screen, planet, font_large, font_small, WIDTH, HEIGHT)
+                # Draw controls hint
+                draw_controls_hint(screen, font_hint, WIDTH)
+                fps_surf = font_hint.render(\
+                    f"FPS: {int(clock.get_fps())}", 
+                    True, (255, 255, 255))
+                screen.blit(fps_surf, (10, 10))
+                # Flip
+                pygame.display.flip()
+                print("flipped")
+                needs_redraw = False
     except Exception as e:
         print(f"Error: {e}")
         import traceback
         traceback.print_exc()
+        input("Press Enter to exit...")
     finally:
         pygame.quit()
         sys.exit()

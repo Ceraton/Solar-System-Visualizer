@@ -7,26 +7,27 @@ def draw_starfield(surface,stars):
 
 _glow_cache = {}
 def draw_glow(surface, color, pos, radius, intensity=80):
-    glow_radius = min(radius, 150)
+    glow_radius = min(radius, 150)    # cap for performance
+    
     key = (glow_radius, color[0], color[1], color[2], intensity)
 
     if key not in _glow_cache:
-        glow_surf = pygame.Surface((radius * 6, radius * 6), pygame.SRCALPHA)
+        glow_surf = pygame.Surface((glow_radius * 6, glow_radius * 6), pygame.SRCALPHA)
         glow_surf = glow_surf.convert_alpha()
-
         for i in range(3, 0, -1):
             alpha = int(intensity * (i / 3) ** 2)
-            r = int(radius * (1 + i * 0.35))
+            r = int(glow_radius * (1 + i * 0.35))
             pygame.draw.circle(
                 glow_surf,
                 (color[0], color[1], color[2], alpha),
-                (glow_radius * 3, glow_radius * 3),   # center of glow surface
+                (glow_radius * 3, glow_radius * 3),
                 r
             )
         _glow_cache[key] = glow_surf
 
     cached = _glow_cache[key]
-    surface.blit(cached, (pos[0] - radius * 3, pos[1] - radius * 3))
+    # ← use glow_radius for offset so it stays centered on the planet
+    surface.blit(cached, (pos[0] - glow_radius * 3, pos[1] - glow_radius * 3))
 
 def draw_planet(surface, planet, pos, radius, selected=False, font=None, show_label=True):
     # Glow
@@ -120,3 +121,56 @@ def is_on_screen(pos, radius, screen_w, screen_h):
         y + radius > 0 and
         y - radius < screen_h
     )
+
+def draw_timeline_controls(surface, timeline, fonts, screen_w, screen_h):
+    # Panel dimensions and position — bottom center
+    panel_w, panel_h = 420, 60
+    panel_x = screen_w // 2 - panel_w // 2
+    panel_y = screen_h - panel_h - 10
+
+    # Panel background
+    panel_surf = pygame.Surface((panel_w, panel_h), pygame.SRCALPHA)
+    pygame.draw.rect(panel_surf, (10, 15, 30, 210), (0, 0, panel_w, panel_h), border_radius=10)
+    pygame.draw.rect(panel_surf, (80, 120, 200, 100), (0, 0, panel_w, panel_h), width=1, border_radius=10)
+    surface.blit(panel_surf, (panel_x, panel_y))
+
+    # Date display — centered in panel
+    date_str  = timeline.current_date.strftime("%B %d, %Y")
+    date_surf = fonts[2].render(date_str, True, (180, 200, 230))
+    date_x    = panel_x + panel_w // 2 - date_surf.get_width() // 2
+    date_y    = panel_y + 8
+    surface.blit(date_surf, (date_x, date_y))
+
+    # Play/pause button — left side of panel
+    btn_cx = panel_x + 30
+    btn_cy = panel_y + panel_h // 2
+
+    if timeline.playing:
+        # Pause icon — two vertical rectangles
+        pygame.draw.rect(surface, (180, 200, 230), (btn_cx - 8, btn_cy - 8, 5, 16))
+        pygame.draw.rect(surface, (180, 200, 230), (btn_cx + 3, btn_cy - 8, 5, 16))
+    else:
+        # Play icon — triangle
+        points = [
+            (btn_cx - 6, btn_cy - 9),
+            (btn_cx - 6, btn_cy + 9),
+            (btn_cx + 10, btn_cy)
+        ]
+        pygame.draw.polygon(surface, (180, 200, 230), points)
+
+    # Speed display — right side of panel
+    speed_str  = f"{timeline.speed / 365.25:.1f}x"
+    speed_surf = fonts[3].render(speed_str, True, (120, 140, 180))
+    speed_x    = panel_x + panel_w - speed_surf.get_width() - 12
+    speed_y    = panel_y + 8
+    surface.blit(speed_surf, (speed_x, speed_y))
+
+    # Date input hint — below speed
+    hint_surf = fonts[3].render("Click date to set", True, (80, 100, 140))
+    hint_x    = panel_x + panel_w - hint_surf.get_width() - 12
+    hint_y    = panel_y + 26
+    surface.blit(hint_surf, (hint_x, hint_y))
+
+    # Spacebar hint — below play button
+    space_surf = fonts[3].render("Space", True, (80, 100, 140))
+    surface.blit(space_surf, (btn_cx - space_surf.get_width() // 2, btn_cy + 12))

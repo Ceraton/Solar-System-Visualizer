@@ -1,4 +1,4 @@
-import pygame
+import pygame, math
 from visuals.renderer import draw_planet, is_on_screen
 
 BASE_EARTH_PX = 30
@@ -19,21 +19,18 @@ class SizeCompareMode:
         self._compute_layout()
 
     def _compute_layout(self):
-        x = 80
+        x  = 80
         cy = self.screen_h / 2
 
         for planet in self.solar_system.planets:
-            r = self._radius_px(planet, self.zoom)
-        
-            if planet.name == "Sun":
-                display_r = min(r, 90)
-            else: 
-                display_r = r
+            r = self._radius_px(planet, zoom=1.0)
 
-        
-            x = x + display_r + 20 #padding before planet
-            self.base_positions.append((x, cy, display_r))
-            x = x + display_r + 20 #padding after planet
+            if planet.name == "Sun":
+                r = min(r, 90)          # cap at layout time using zoom=1.0
+
+            x = x + r + 20             # padding before
+            self.base_positions.append((x, cy, r))
+            x = x + r + 20             # padding after
 
     def _radius_px(self, planet, zoom):
         ratio = planet.radius_km / EARTH_RADIUS_KM
@@ -63,35 +60,43 @@ class SizeCompareMode:
         self.offset_y = 0.0
 
     def get_hovered(self, mouse_pos):
+        mx, my = mouse_pos
         for i, (bx, by, br) in enumerate(self.base_positions):
             (sx, sy) = self.world_to_screen(bx, by)
             r = br * self.zoom
-
-            if (max(mouse_pos[0], sx) - min(mouse_pos[0], sx) <= r or \
-                max(mouse_pos[1], sy) - min((mouse_pos[1], sy)) <= r):
+            distance = math.sqrt((mx - sx) ** 2 + (my - sy) ** 2)
+            if distance <= r:
                 return i
         return None
 
     def draw(self, surface, fonts, selected_idx, show_labels):
         for i, (planet, (bx, by, br)) in enumerate(zip(self.solar_system.planets, self.base_positions)):
-            (sx, sy) = self.world_to_screen(bx, by)
+            sx, sy = self.world_to_screen(bx, by)
             r = max(2, int(br * self.zoom))
-            is_selected = (i == selected_idx)
 
             if planet.name == "Sun" and self.zoom < 3:
                 true_radius_px = self._radius_px(planet, self.zoom)
+                r = min(true_radius_px, int(90 * self.zoom))
                 note = f"(True scale: {true_radius_px}px)"
                 note_surf = fonts[3].render(note, True, (150, 120, 50))
-                note_x = sx - note_surf.get_width() // 2
-                note_y = sy - r - 30
+                note_x = int(sx) - note_surf.get_width() // 2
+                note_y = int(sy) - r - 30
                 surface.blit(note_surf, (note_x, note_y))
-            
+
             if not is_on_screen((int(sx), int(sy)), r, self.screen_w, self.screen_h):
                 continue
 
-            draw_planet(surface, planet, (int(sx), int(sy)), r, \
-                    selected=is_selected, font=fonts[0] if show_labels else None,
-                    show_label=show_labels)
+            is_selected = (i == selected_idx)      # ← define it before using it
+
+            draw_planet(
+                surface,
+                planet,
+                (int(sx), int(sy)),
+                r,
+                selected=is_selected,
+                font=fonts[0] if show_labels else None,
+                show_label=show_labels
+            )
 
         earth_diameter_px = int(BASE_EARTH_PX * self.zoom * 2)
         bar_x = 20

@@ -19,6 +19,8 @@ class Planet(CelestialBody):
     def __init__(self, data: dict):
         super().__init__(data)
         self.distance_au = data["distance_au"]
+        self.mean_longitude_deg   = data["mean_longitude_deg"]
+        self.orbital_period_days  = data["orbital_period_days"]
         self.moons = []
 
     def add_moon(self, moon):

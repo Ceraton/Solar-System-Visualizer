@@ -1,6 +1,8 @@
 [
   {
     "name": "Sun",
+    "mean_longitude_deg": 0, 
+    "orbital_period_days": 0,
     "type": "star",
     "radius_km": 695700,
     "distance_au": 0,
@@ -12,6 +14,8 @@
   },
   {
     "name": "Mercury",
+    "mean_longitude_deg": 252.25, 
+    "orbital_period_days": 87.97,
     "type": "planet",
     "radius_km": 2439.7,
     "distance_au": 0.39,
@@ -23,6 +27,8 @@
   },
   {
     "name": "Venus",
+    "mean_longitude_deg": 181.98, 
+    "orbital_period_days": 224.70,
     "type": "planet",
     "radius_km": 6051.8,
     "distance_au": 0.72,
@@ -34,6 +40,8 @@
   },
   {
     "name": "Earth",
+    "mean_longitude_deg": 100.46,
+    "orbital_period_days": 365.25,
     "type": "planet",
     "radius_km": 6371,
     "distance_au": 1.0,
@@ -45,6 +53,8 @@
   },
   {
     "name": "Mars",
+    "mean_longitude_deg": 355.45, 
+    "orbital_period_days": 686.97,
     "type": "planet",
     "radius_km": 3389.5,
     "distance_au": 1.52,
@@ -56,6 +66,8 @@
   },
   {
     "name": "Jupiter",
+    "mean_longitude_deg": 34.40,  
+    "orbital_period_days": 4332.59,
     "type": "planet",
     "radius_km": 69911,
     "distance_au": 5.2,
@@ -67,6 +79,8 @@
   },
   {
     "name": "Saturn",
+    "mean_longitude_deg": 49.94,  
+    "orbital_period_days": 10759.22,
     "type": "planet",
     "radius_km": 58232,
     "distance_au": 9.58,
@@ -78,6 +92,8 @@
   },
   {
     "name": "Uranus",
+    "mean_longitude_deg": 313.23, 
+    "orbital_period_days": 30688.5,
     "type": "planet",
     "radius_km": 25362,
     "distance_au": 19.2,
@@ -89,6 +105,8 @@
   },
   {
     "name": "Neptune",
+    "mean_longitude_deg": 304.88, 
+    "orbital_period_days": 60195.0,
     "type": "planet",
     "radius_km": 24622,
     "distance_au": 30.05,
