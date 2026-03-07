@@ -9,14 +9,14 @@ DAYS_PER_MINUTE = 365.25
 
 class Timeline:
     def __init__(self):
-        self.current_date = date.today()
-        self.playing = False
-        self.speed = DAYS_PER_MINUTE
+        self.start_date = J2000_EPOCH
+        self.current_date = 0.0
+        self.playing = True
+        self.speed = 1
 
     def tick(self, dt):
         if self.playing:
-            days_elapsed = (dt / 1000) * (self.speed / 60)
-            self.current_date += timedelta(days=days_elapsed)
+            self.current_date += (dt / 1000.0) * self.speed
     
     def play(self):
         self.playing = True
@@ -30,6 +30,9 @@ class Timeline:
     def get_angle(self, planet):
         if planet.orbital_period_days == 0:
             return 0
-        days_since_j2000 = (self.current_date - J2000_EPOCH).days
-        degrees = planet.mean_longitude_deg + (360 / planet.orbital_period_days) * days_since_j2000
-        return degrees % 360
+        motion = (360.0 / planet.orbital_period_days) * self.current_date
+        return (planet.mean_longitude_deg + motion) % 360
+    
+    def get_atomic_date(self):
+        target_date = self.start_date + timedelta(days=self.current_date)
+        return target_date.strftime("%b %d, %Y | %H:%M")

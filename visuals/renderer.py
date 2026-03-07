@@ -1,9 +1,17 @@
-import pygame, math
+import pygame, math, time
 
 
-def draw_starfield(surface,stars):
-    for (x, y, r, brightness) in stars:
-        pygame.draw.circle(surface, (brightness, brightness, brightness), (x, y), r)
+def draw_starfield(surface, stars):
+    t = time.time() * 5  # Speed of the twinkle
+    for i, (x, y, r, brightness) in enumerate(stars):
+        # Only twinkle a subset of stars for realism
+        if i % 5 == 0:
+            twinkle = (math.sin(t + i) + 1) / 2  # Value between 0 and 1
+            current_brightness = int(brightness * (0.7 + 0.3 * twinkle))
+        else:
+            current_brightness = brightness
+            
+        pygame.draw.circle(surface, (current_brightness,) * 3, (x, y), r)
 
 _glow_cache = {}
 def draw_glow(surface, color, pos, radius, intensity=80):

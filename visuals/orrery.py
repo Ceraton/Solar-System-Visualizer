@@ -66,7 +66,9 @@ class OrreryMode:
         self.offset_y = self.screen_h / 2
 
     def tick(self, dt):
-        self.time += dt * 0.0005
+        if self.timeline.playing:
+            days_per_ms = (1.0 / 1000.0) 
+            self.timeline.current_date += dt * days_per_ms * self.timeline.speed
 
     def get_hovered(self, mouse_pos):
         mx, my = mouse_pos

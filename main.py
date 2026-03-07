@@ -5,15 +5,13 @@ from visuals.renderer import draw_starfield, draw_info_panel, draw_controls_hint
 from visuals.size_compare import SizeCompareMode
 from visuals.orrery import OrreryMode
 from visuals.timeline import Timeline
-import os
 
 WIDTH, HEIGHT = 1280, 800
 FPS           = 60
 BG_COLOR      = (4, 6, 18)
-PLANETS_PATH  = Path('data/planets.json')
-MOONS_PATH    = Path('data/moons.json')
-
-os.environ['SDL_VIDEO_WINDOW_POS'] = '100,100'
+base_path = Path(__file__).parent
+PLANETS_PATH = base_path / 'data' / 'planets.json'
+MOONS_PATH   = base_path / 'data' / 'moons.json'
 
 def generate_stars(n=200, w=WIDTH, h=HEIGHT):
     stars = []
@@ -29,6 +27,11 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Solar System Visualizer")
+
+    pygame.event.pump() 
+    screen.fill(BG_COLOR)
+    pygame.display.flip()
+
     clock = pygame.time.Clock()
 
     font_label = pygame.font.SysFont(None, 18)
@@ -82,10 +85,10 @@ def main():
                         timeline.play()
                     needs_redraw = True
                 if event.key == pygame.K_EQUALS:
-                    timeline.speed *= 2
+                    timeline.speed = min(timeline.speed * 2, 1024) # Max speed cap
                     needs_redraw = True
                 if event.key == pygame.K_MINUS:
-                    timeline.speed /= 2
+                    timeline.speed = max(timeline.speed / 2, 0.125) # Min speed cap
                     needs_redraw = True
 
             if event.type == pygame.MOUSEWHEEL:
@@ -121,14 +124,32 @@ def main():
             screen.fill(BG_COLOR)
             draw_starfield(screen, stars)
             active_mode.draw(screen, fonts, selected_idx, show_labels)
+
+            date_str = timeline.get_atomic_date()
+            date_surf = font_large.render(date_str, True, (200, 220, 255))
+            date_rect = date_surf.get_rect(centerx=WIDTH//2, top=20)
+            bg_rect = date_rect.inflate(20, 10)
+            pygame.draw.rect(screen, (10, 15, 30), bg_rect, border_radius=5)
+            screen.blit(date_surf, date_rect)
+
+            # --- NEW: Simulation Status Overlay ---
+            status_text = "PAUSED" if not timeline.playing else "PLAYING"
+            speed_text  = f"Speed: {timeline.speed}x"
+            
+            # Render the status (Red if paused, Green if playing)
+            status_color = (255, 100, 100) if not timeline.playing else (100, 255, 100)
+            
+            status_surf = font_small.render(f"{status_text} | {speed_text}", True, status_color)
+            # Position it in the top right, or near the FPS
+            screen.blit(status_surf, (WIDTH - 200, 10))
+            # --------------------------------------
             if selected_idx is not None:
-                planet = solar_system.planets[selected_idx]
-                draw_info_panel(screen, planet, font_large, font_small, WIDTH, HEIGHT)
+                target = solar_system.get_all_bodies()[selected_idx]
+                draw_info_panel(screen, target, font_large, font_small, WIDTH, HEIGHT)
             draw_controls_hint(screen, font_hint, WIDTH)
             fps_surf = font_hint.render(f"FPS: {int(clock.get_fps())}", True, (255, 255, 255))
             screen.blit(fps_surf, (10, 10))
             pygame.display.flip()
-            pygame.display.update()    # ← add this
             needs_redraw = False
 
     pygame.quit()
