@@ -42,4 +42,22 @@ Ensure you have Python 3.10 or higher installed.
 
 ### 2. Clone the Repository
 ```bash
-git clone
+git clone [https://github.com/ceraton/Solar-System-Visualizer.git](https://github.com/ceraton/Solar-System-Visualizer.git)
+cd Solar-System-Visualizer
+
+## 3. Install Dependencies
+```bash
+pip install pygame-ce
+
+---
+## 🧪 The Math Behind the Orbits
+The simulation uses simplified Keplerian elements. The position of a body at any given time t is determined by calculating the Mean Longitude:
+θ(t)=L0​+(P360​×Δt)
+
+Where:
+
+    L0​: Mean Longitude at J2000 reference.
+
+    P: Orbital Period in Earth days.
+
+    Δt: Days elapsed since January 1, 2000.
