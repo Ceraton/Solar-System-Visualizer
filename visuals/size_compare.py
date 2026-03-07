@@ -43,12 +43,12 @@ class SizeCompareMode:
     
     def handle_event(self, event):
         if event.type == pygame.MOUSEWHEEL:
-            factor = 1.1 if event.y == 1 else 0.9
+            factor = 1.1 if event.y > 0 else 0.9
         
-        mx, my = pygame.mouse.get_pos()
-        self.offset_x = mx - (mx - self.offset_x) * factor
-        self.offset_y = my - (my - self.offset_y) * factor
-        self.zoom = clamp(self.zoom * factor, 0.1, 10.0)
+            mx, my = pygame.mouse.get_pos()
+            self.offset_x = mx - (mx - self.offset_x) * factor
+            self.offset_y = my - (my - self.offset_y) * factor
+            self.zoom = clamp(self.zoom * factor, 0.1, 10.0)
 
     def update_pan(self, dx, dy):
         self.offset_x += dx

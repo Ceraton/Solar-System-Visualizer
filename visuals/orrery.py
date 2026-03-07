@@ -49,7 +49,7 @@ class OrreryMode:
 
     def handle_event(self, event):
         if event.type == pygame.MOUSEWHEEL:
-            factor = 1.1 if event.y == 1 else 0.9
+            factor = 1.1 if event.y > 0 else 0.9
         
             mx, my = pygame.mouse.get_pos()
             self.offset_x = mx - (mx - self.offset_x) * factor
