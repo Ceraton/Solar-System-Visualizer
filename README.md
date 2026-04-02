@@ -1,6 +1,6 @@
 ### 🌌 Solar System Visualizer
 
-An interactive, high-performance 2D orrery and astronomical data visualizer built with Python and Pygame-CE.
+A vibecoded interactive, high-performance 2D orrery and astronomical data visualizer built with Python and Pygame-CE.
 This project simulates planetary motion using real-world orbital elements (J2000 Epoch) and provides an immersive way to explore celestial mechanics.
 
 
